@@ -29,25 +29,16 @@ jobs:
         uses: seanmiddleditch/gha-setup-ninja@v3
 
       - name: Setup vcpkg
-        id: vcpkg
-        uses: lukka/setup-vcpkg@v1
+        uses: lukka/run-vcpkg@v10
         with:
-          vcpkgGitCommitId: '41f4dbea09553295d85f1e4b74c1f13902182a88'
-          runVcpkgInstall: true
-          vcpkgJsonGlob: '**/vcpkg.json'
-
-      - name: Install OpenCV via vcpkg manifest
-        if: steps.vcpkg.outputs.vcpkgJsonFound != 'true'
-        run: |
-          & "$env:VCPKG_ROOT/scripts/vcpkg" install opencv --triplet x64-windows
-        shell: pwsh
+          vcpkgArguments: install opencv --triplet x64-windows
 
       - name: Configure CMake
         run: |
           cmake -S . -B build `
                 -G "Ninja" `
                 -DCMAKE_BUILD_TYPE=${env:BUILD_TYPE} `
-                -DCMAKE_TOOLCHAIN_FILE="${{ steps.vcpkg.outputs.cmakeToolchainFile }}"
+                -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
         shell: pwsh
 
       - name: Build
