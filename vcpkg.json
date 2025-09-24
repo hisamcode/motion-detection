@@ -1,7 +1,0 @@
-{
-  "name": "motion-detection",
-  "version-string": "1.0.0",
-  "dependencies": [
-    "opencv"
-  ]
-}
