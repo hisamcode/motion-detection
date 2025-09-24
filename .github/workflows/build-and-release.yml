@@ -31,6 +31,9 @@ jobs:
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v10
         with:
+          vcpkgGitURL: https://github.com/microsoft/vcpkg.git
+          vcpkgGitCommitId: '41f4dbea09553295d85f1e4b74c1f13902182a88'
+          vcpkgDirectory: '${{ runner.temp }}/vcpkg'
           vcpkgArguments: install opencv --triplet x64-windows
 
       - name: Configure CMake
