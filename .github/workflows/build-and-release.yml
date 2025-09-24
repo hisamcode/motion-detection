@@ -34,7 +34,7 @@ jobs:
           vcpkgGitURL: https://github.com/microsoft/vcpkg.git
           vcpkgGitCommitId: '41f4dbea09553295d85f1e4b74c1f13902182a88'
           vcpkgDirectory: '${{ runner.temp }}/vcpkg'
-          vcpkgJsonGlob: 'vcpkg.json'
+          vcpkgJsonGlob: '**/vcpkg.json'
 
       - name: Configure CMake
         run: |
