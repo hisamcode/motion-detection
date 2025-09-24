@@ -25,7 +25,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake libopencv-dev zip
+          sudo apt-get install -y build-essential cmake libopencv-dev zip patchelf
 
       - name: Install dependencies (Windows)
         if: matrix.os == 'windows-latest'
@@ -46,21 +46,34 @@ jobs:
       - name: Build
         run: cmake --build build --config Release
 
-      - name: Package artifact (Ubuntu)
+      - name: Prepare artifact (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          mkdir -p dist
+          mkdir -p dist/lib
           cp build/motion_detection dist/motion_detection
+          ldd dist/motion_detection | awk '/opencv/ {print $3}' | sort -u > opencv_libs.txt
+          while read -r lib; do
+            if [ -n "$lib" ] && [ -f "$lib" ]; then
+              cp -L "$lib" dist/lib/
+            fi
+          done < opencv_libs.txt
+          patchelf --set-rpath '$ORIGIN/lib' dist/motion_detection
           strip --strip-unneeded dist/motion_detection || true
-          (cd dist && zip -r ../motion_detection-ubuntu-latest.zip motion_detection)
+          (cd dist && zip -r ../motion_detection-ubuntu-latest.zip .)
 
-      - name: Package artifact (Windows)
+      - name: Prepare artifact (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path dist -Force | Out-Null
-          Copy-Item -Path "build/Release/motion_detection.exe" -Destination "dist/motion_detection.exe"
-          Compress-Archive -Path dist/motion_detection.exe -DestinationPath motion_detection-windows-latest.zip -Force
+          Copy-Item -Path "build/Release/motion_detection.exe" -Destination "dist/motion_detection.exe" -Force
+          $opencvBin = 'C:\tools\opencv\build\x64\vc16\bin'
+          Copy-Item -Path (Join-Path $opencvBin 'opencv_world*.dll') -Destination dist -Force
+          $ffmpegDll = Join-Path $opencvBin 'opencv_videoio_ffmpeg*.dll'
+          if (Get-ChildItem $ffmpegDll -ErrorAction SilentlyContinue) {
+            Copy-Item -Path $ffmpegDll -Destination dist -Force
+          }
+          Compress-Archive -Path dist\* -DestinationPath motion_detection-windows-latest.zip -Force
 
       - name: Upload artifact (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
