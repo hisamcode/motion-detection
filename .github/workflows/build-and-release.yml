@@ -32,7 +32,7 @@ jobs:
         uses: lukka/run-vcpkg@v10
         with:
           vcpkgGitURL: https://github.com/microsoft/vcpkg.git
-          vcpkgGitCommitId: 'b7b7e4b8c8e9b8c8e9b8c8e9b8c8e9b8c8e9b8c8e'
+          vcpkgGitCommitId: '6421c16ca7972b33f1f0a881a83acac7b40c8b50'
           vcpkgDirectory: '${{ runner.temp }}/vcpkg'
           vcpkgJsonGlob: 'vcpkg.json'
 
